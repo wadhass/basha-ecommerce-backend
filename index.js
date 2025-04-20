@@ -99,6 +99,43 @@
 
 
 
+// const express      = require('express');
+// const mongoose     = require('mongoose');
+// const cors         = require('cors');
+// const cookieParser = require('cookie-parser');
+// require('dotenv').config();
+
+// const app = express();
+// const port = process.env.PORT || 3030;
+
+// // Middleware
+// app.use(express.json({ limit: '25mb' }));
+// app.use(express.urlencoded({ limit: '25mb', extended: true }));
+// app.use(cookieParser());
+// app.use(cors({ 
+//   origin: ["http://localhost:5173", "https://basha-ecommerces.vercel.app"],
+//   credentials: true 
+// }));
+
+// // Mount routes
+// app.use('/api/auth',    require('./src/users/user.route'));
+// app.use('/api/products',require('./src/products/products.route'));
+// app.use('/api/reviews', require('./src/reviews/reviews.router'));
+
+// app.get('/', (req, res) => res.send('Server is running!'));
+
+// // Connect & start
+// mongoose.connect(process.env.DB_URL)
+//   .then(() => {
+//     console.log(' MongoDB connected');
+//     app.listen(port, () => console.log(` Listening on port ${port}`));
+//   })
+//   .catch(err => console.error(' DB connection error:', err));
+
+
+
+
+
 const express      = require('express');
 const mongoose     = require('mongoose');
 const cors         = require('cors');
@@ -108,23 +145,40 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3030;
 
+// ✅ CORS configuration
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://basha-ecommerces.vercel.app'
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+};
+
 // Middleware
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ limit: '25mb', extended: true }));
 app.use(cookieParser());
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 
-// Mount routes
-app.use('/api/auth',    require('./src/users/user.route'));
-app.use('/api/products',require('./src/products/products.route'));
-app.use('/api/reviews', require('./src/reviews/reviews.router'));
+// Routes
+app.use('/api/auth',     require('./src/users/user.route'));
+app.use('/api/products', require('./src/products/products.route'));
+app.use('/api/reviews',  require('./src/reviews/reviews.router'));
 
 app.get('/', (req, res) => res.send('Server is running!'));
 
-// Connect & start
+// Connect to MongoDB and start the server
 mongoose.connect(process.env.DB_URL)
   .then(() => {
     console.log('✅ MongoDB connected');
-    app.listen(port, () => console.log(`🚀 Listening on port ${port}`));
+    app.listen(port, () => console.log(`🚀 Server listening on port ${port}`));
   })
   .catch(err => console.error('❌ DB connection error:', err));
